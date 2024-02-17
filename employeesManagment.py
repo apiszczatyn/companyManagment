@@ -1,6 +1,8 @@
 import sqlite3
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
+
 
 
 dbConnection = sqlite3.connect("companyDatabase.db")
@@ -11,6 +13,20 @@ newEmployee = []
 positions = ['Pracownik Linii Produkcyjnej','Technik Utrzymania Ruchu','Specjalista ds. Logistyki',
              'Ksiegowy','Brygadzista Linii Produkcyjnej','Technolog','Magazynier','Menadzer ds. Sprzedazy',
              'Specjalista ds. BHP','Kierownik Produkcji','Kierowca']
+
+def deleteEmployee(root,id):
+    db.execute("SELECT firstName, lastName FROM employees WHERE ID = ?",(id,))
+    rekord = db.fetchone()
+    result = messagebox.askyesno("Usuniecie pracownika", "Czy na pewno chcesz usunac "+rekord[0]+" "+rekord[1]+" z listy pracownikow?\nTa operacja jest nieodwracalna!")
+    if(result):
+        db.execute("DELETE FROM employees WHERE ID = ?",(id,))
+        dbConnection.commit()
+        root.destroy()
+    else:
+        pass    
+
+
+
 
 def writeEmployeeToDb(root):
     db.execute("INSERT INTO employees (firstName, lastName, phoneNumber, age, position, hWage) VALUES (?,?,'unknown',?,?,?)",(newEmployee[0][0].get(),newEmployee[0][1].get(),newEmployee[0][2].get(),newEmployee[0][3].get(),newEmployee[0][4].get()))
@@ -101,6 +117,7 @@ def showEmployees(root):
          tk.Label(frame, text=position,borderwidth=4, relief="groove").grid(row=i+1, column=2, sticky="nsew", padx=0, pady=5)
          tk.Label(frame, text=age,borderwidth=4, relief="groove").grid(row=i+1, column=3, sticky="nsew", padx=0, pady=5)
          tk.Label(frame, text=round(hWage,2),borderwidth=4, relief="groove").grid(row=i+1, column=4, sticky="nsew", padx=0, pady=5)
+         tk.Button(frame, text ="Usun",command=lambda _id = id: deleteEmployee(showEmployeesWindow,_id)).grid(row=i+1,column=5,padx = 10, pady=5)
 
      showEmployeesWindow.bind_all("<MouseWheel>", on_mousewheel)
      frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
